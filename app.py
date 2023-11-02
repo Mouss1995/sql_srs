@@ -3,15 +3,63 @@ import pandas as pd
 import duckdb
 import io
 
-option = st.selectbox(
-    "What would you like to review ?",
-    ['Joins', 'GroupBy', 'Windows Functions'],
-    index=None,
-    placeholder='Select a theme ...'
-)
 
-st.write('You selected:', option)
+csv = """
+beverage, price
+orange juice, 1.5
+expresso, 2.5
+tea, 3
+"""
 
-data = {'a': [1, 2, 3], 'b':[4, 5, 6]}
+beverages = pd.read_csv(io.StringIO(csv))
 
-df = pd.DataFrame(data)
+csv2 = """
+food_item, price
+cookie, 3.5
+chocolat, 2
+muffin, 3
+"""
+
+food_items = pd.read_csv(io.StringIO(csv2))
+
+answer = """
+SELECT * FROM beverages
+CROSS JOIN food_items
+"""
+
+solution = duckdb.sql(answer).df()
+
+
+with st.sidebar:
+
+    option = st.selectbox(
+        "What would you like to review ?",
+        ['Joins', 'GroupBy', 'Windows Functions'],
+        index=None,
+        placeholder='Select a theme ...'
+    )
+
+    st.write('You selected:', option)
+
+st.header('Entrez votre requête :')
+
+query = st.text_area(label="Votre code SQL ici", key='user_input')
+
+if query :
+
+   result = duckdb.sql(query).df()
+   st.dataframe(result)
+
+
+tab2, tab3 = st.tabs(['Tables', 'Solutions'])
+
+with tab2:
+   st.write("table: beverages")
+   st.dataframe(beverages)
+   st.write("table: food_items")
+   st.dataframe(food_items)
+   st.write("expected")
+   st.dataframe(solution)
+
+with tab3:
+   st.write(answer)

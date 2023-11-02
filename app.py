@@ -7,7 +7,7 @@ option = st.selectbox(
     "What would you like to review ?",
     ['Joins', 'GroupBy', 'Windows Functions'],
     index=None,
-    palceholder='Select a theme ...'
+    placeholder='Select a theme ...'
 )
 
 st.write('You selected:', option)

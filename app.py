@@ -6,14 +6,14 @@ import duckdb
 import pandas as pd
 import streamlit as st
 
-CSV = """
+csv = """
 beverage, price
 orange juice, 1.5
 expresso, 2.5
 tea, 3
 """
 
-beverages = pd.read_csv(io.StringIO(CSV))
+beverages = pd.read_csv(io.StringIO(csv))
 
 CSV2 = """
 food_item, price

@@ -1,3 +1,5 @@
-venv/
+sql_env/
 
 *.csv
+
+test_db.py

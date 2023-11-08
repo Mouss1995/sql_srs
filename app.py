@@ -1,20 +1,22 @@
 """Script for SQL-SRS application streamlit."""
 
-import io
-import ast
+import logging
+import os
+
 import duckdb
-import pandas as pd
 import streamlit as st
 
+if "data" not in os.listdir():
+    print("creating folder data")
+    logging.error(os.listdir())
+    logging.error("creating folder data")
+    os.mkdir("data")
+
+if "exercices_sql_tables_duckdb" not in os.listdir("data"):
+    exec(open("init_db.py").read())
+    # subprocess.run(["python", "init_db.py"])
+
 con = duckdb.connect(database="data/exercices_sql_tables.duckdb", read_only=False)
-
-# ANSWER_STR = """
-# SELECT * FROM beverages
-# CROSS JOIN food_items
-# """
-
-# solution_df = duckdb.sql(ANSWER_STR).df()
-
 
 with st.sidebar:
     theme = st.selectbox(

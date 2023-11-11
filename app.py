@@ -2,6 +2,7 @@
 
 import logging
 import os
+from datetime import date, timedelta, datetime
 
 import duckdb
 import streamlit as st
@@ -34,6 +35,10 @@ def check_users_solution(user_query: str) -> None:
 
     try:
         result = result[solution_df.columns]
+        st.dataframe(result.compare(solution_df))
+        if result.compare(solution_df).shape == (0, 0):
+            st.write("Correct")
+            st.balloons()
 
     except KeyError as e:
         st.error("Some columns are missing")
@@ -47,7 +52,7 @@ def check_users_solution(user_query: str) -> None:
 
 
 theme_available = con.execute(
-    f"SELECT DISTINCT(theme) AS unique_theme FROM memory_state"
+    "SELECT DISTINCT(theme) AS unique_theme FROM memory_state"
 ).df()
 list_theme_available = theme_available["unique_theme"].tolist()
 
@@ -69,6 +74,8 @@ with st.sidebar:
 
     exercise = con.execute(select_exercise_query).df().reset_index(drop=True)
 
+    st.dataframe(exercise)
+
     exercise_name = exercise.loc[0, "exercise_name"]
     with open(f"answers/{exercise_name}.sql") as f:
         answer = f.read()
@@ -81,6 +88,19 @@ query = st.text_area(label="Votre code SQL ici", key="user_input")
 
 if query:
     check_users_solution(query)
+
+
+for n_days in [2, 7, 21]:
+    if st.button(f"Revoir dans {n_days} jours"):
+        next_review = date.today() + timedelta(days=n_days)
+        con.execute(
+            f"UPDATE memory_state SET last_reviewed = '{next_review}' WHERE exercise_name = '{exercise_name}'"
+        )
+        st.rerun()
+
+if st.button("Reset", type="primary"):
+    con.execute("UPDATE memory_state SET last_reviewed = '1970-01-01'")
+    st.rerun()  # Rerun in order to display the update dataframe
 
 tab2, tab3 = st.tabs(["Tables", "Solution"])
 

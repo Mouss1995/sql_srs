@@ -19,6 +19,33 @@ if "exercices_sql_tables_duckdb" not in os.listdir("data"):
 con = duckdb.connect(database="data/exercices_sql_tables.duckdb", read_only=False)
 
 
+def check_users_solution(user_query: str) -> None:
+    """
+    Checks that yser SQK query is correct by:
+    1: Checking the columns
+    2: checking the values
+    :param user_query: a string containing SQL query
+    """
+    result = con.execute(user_query).df()
+    st.dataframe(result)
+
+    if len(result.columns) != len(solution_df.columns):
+        st.error("Some columns are missing")
+
+    try:
+        result = result[solution_df.columns]
+
+    except KeyError as e:
+        st.error("Some columns are missing")
+
+    n_len_differences = result.shape[0] - solution_df.shape[0]
+
+    if n_len_differences != 0:
+        st.error(
+            f"Result has a {n_len_differences} lines difference with the solution_df"
+        )
+
+
 theme_available = con.execute(
     f"SELECT DISTINCT(theme) AS unique_theme FROM memory_state"
 ).df()
@@ -53,24 +80,7 @@ st.header("Entrez votre requête :")
 query = st.text_area(label="Votre code SQL ici", key="user_input")
 
 if query:
-    result = con.execute(query).df()
-    st.dataframe(result)
-
-    if len(result.columns) != len(solution_df.columns):
-        st.error("Some columns are missing")
-
-    try:
-        result = result[solution_df.columns]
-
-    except KeyError as e:
-        st.error("Some columns are missing")
-
-    n_len_differences = result.shape[0] - solution_df.shape[0]
-
-    if n_len_differences != 0:
-        st.error(
-            f"Result has a {n_len_differences} lines difference with the solution_df"
-        )
+    check_users_solution(query)
 
 tab2, tab3 = st.tabs(["Tables", "Solution"])
 
